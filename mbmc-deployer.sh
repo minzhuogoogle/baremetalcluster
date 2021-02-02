@@ -280,7 +280,7 @@ prepare_ssh_key() {
       set -x
       rm -rf ssh-metadata
       ssh-keygen -t rsa -N "" -f ~/.ssh/id_rsa
-      sed 's/ssh-rsa/root:ssh-rsa/' ~/.ssh/id_rsa.pub > ssh-metadata-$grandomid
+      sed 's/ssh-rsa/root:ssh-rsa/' ~/.ssh/id_rsa.pub > ssh-metadata
 EOF
   gcloud compute scp root@$VM_WS:/root/ssh-metadata ssh-metadata-$grandomid --zone $zone
   retcode=$?
