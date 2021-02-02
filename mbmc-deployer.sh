@@ -479,9 +479,11 @@ create_vpc
 until [ $loop -gt $totalclusters ]; do
   setup_local_variable
   create_vm
-  enable_ip_forwarding
-  enable_routing_node
-  enable_routing_lber
+  if [ $mnetworkflag -eq 1 ]; then
+    enable_ip_forwarding
+    enable_routing_node
+    enable_routing_lber
+  fi  
   install_standard_pkt
   create_vxlan
   if [ $loop -eq 0 ]; then
