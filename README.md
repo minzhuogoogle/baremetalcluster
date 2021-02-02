@@ -1,4 +1,4 @@
-# bare-metal  cluster
+# Bare-metal  Cluster Deployer
 ## Objective
 
 To create multiple bare metal clusters based on GCP VMs in the same network or different networks. Enable Routing to make ingress reachable across different clusters.
