@@ -499,4 +499,11 @@ until [ $loop -gt $totalclusters ]; do
 done
 
 echo "Finishing all clusters creation!"
+echo "Finishing all clusters creation!"
+echo "If everything is fine, you can access istio demo app bookinfo at: "
+echo "  10.201.10.x/productpage, x= 10, 42 and 74"
+echo "Nginx is able to be accessed at:"
+echo "  10.201.10.y, y=11,43,75"
+echo "  Additional 3 load-balancer VIPs are available in the pool."
+                           
 
