@@ -185,7 +185,7 @@ EOF
 
 prepare_admin_ws() {
    gcloud compute scp $sa_key root@$VM_WS:/root/$sa_key --zone $zone
-   gcloud compute scp nginx.yaml root@$VM_WS:/root/$nginx.yaml --zone $zone
+   gcloud compute scp nginx.yaml root@$VM_WS:/root/nginx.yaml --zone $zone
    gcloud compute ssh root@$VM_WS --zone $zone "${EXTRA_SSH_ARGS[@]}" << EOF
    curl -LO "https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl"
    chmod +x kubectl
