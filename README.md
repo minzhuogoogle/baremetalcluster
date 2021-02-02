@@ -35,6 +35,9 @@ There are multiple load-balance schemes for Bare-Metal Cluster. Here we use a hy
       Cluster_index: integer from 0 to 255. By default it is 1.
       Same or diff network: 1 is to use different network. By default, it is 1.
       Number of clusters: integer from 1 to 16. By default it is 2.
+      
+      Please download all files to the same directory before running this tool.
+      
 
 
 
