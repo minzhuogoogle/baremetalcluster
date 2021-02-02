@@ -63,10 +63,10 @@ GVM+=("$VM_W2")
 }
 
 create_vpc() {
-  gcloud compute networks create $VPC
+  gcloud compute networks create $VPC --subnet-mode=custom --mtu=1460 --bgp-routing-mode=regional
+  gcloud compute networks subnets create bm-subset-$cluster_index --range=10.0.2.0/24 --network=$VPC --region=$region
   gcloud compute firewall-rules create $FIREWALL_NAME --network $VPC --allow all
 }
-
 
 create_vm() {
   declare -a IPs=()
