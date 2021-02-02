@@ -28,4 +28,13 @@ There are multiple load-balance schemes for Bare-Metal Cluster. Here we use a hy
    2.3 On all nodes add routers to load-balancer in the other cluster
    
        *Bootstrap can be used as the gateway too ideally. 
+       
+### Usage
+./mbmc-deployer.sh [cluster_index] [differnet_network [1|0]] [Number of clusters]
+
+      Cluster_index: integer from 0 to 255. By default it is 1.
+      Same or diff network: 1 is to use different network. By default, it is 1.
+      Number of clusters: integer from 1 to 16. By default it is 2.
+
+
 
