@@ -381,7 +381,6 @@ enable_routing_node() {
     echo "Updating routers in $vm"
     gcloud compute scp populate_routing_table.data root@$vm:/root/nodes.sh --zone $zone
     gcloud compute ssh root@$VM_WS --zone $zone "${EXTRA_SSH_ARGS[@]}" << EOF
-    set -x
     chmod +x /root/nodes.sh
     /root/nodes.sh
 EOF
@@ -394,7 +393,6 @@ enable_routing_lber() {
     echo "Updating routers in $vm"
     gcloud compute scp populate_routing_table_cp.data root@$vm:/root/cps.sh --zone $zone
     gcloud compute ssh root@$vm --zone $zone "${EXTRA_SSH_ARGS[@]}" << EOF
-    set -x
     chmod +x /root/cps.sh
     /root/cps.sh
 EOF
