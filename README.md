@@ -12,13 +12,19 @@ Implementation
 There are multiple load-balance schemes for Bare-Metal Cluster. Here we use a hybrid Load-balancer scheme bundled in Control Nodes in cluster.
 
 1. Multi-cluster in same network
-   Build 2 BM clusters
-   Adding fwd entries in all nodes to allow L2 connectivity among all nodes in all cluster
+
+   1.1 Build multiple BM clusters
+   
+   1.2 Adding fwd entries in all nodes to allow L2 connectivity among all nodes in all cluster
 
 2. Multi-cluster in different networks
-  Build 2 BM clusters
-  Build gateway VM which has 2 Vxlan interfaces
-  On all control nodes add routers to L2 subnet in the other cluster
-  On all nodes add routers to load-balancer in the other cluster
+
+  2.1 Build multiple BM clusters
+  
+  2.2 Build gateway VM which has Vxlan interface per cluster
+  
+  2.3 On all control nodes add routers to L2 subnet in the other cluster
+  
+  2.3 On all nodes add routers to load-balancer in the other cluster
   *Bootstrap can be used as the gateway too ideally. 
 
