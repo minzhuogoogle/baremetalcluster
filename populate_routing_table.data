@@ -1,0 +1,21 @@
+#!/bin/bash
+ip route add 10.201.1.42/32 via 10.201.1.7 dev vxlan1
+ip route add 10.201.1.43/32 via 10.201.1.7 dev vxlan1
+ip route add 10.201.1.44/32 via 10.201.1.7 dev vxlan1
+ip route add 10.201.1.74/32 via 10.201.1.7 dev vxlan1
+ip route add 10.201.1.75/32 via 10.201.1.7 dev vxlan1
+ip route add 10.201.1.76/32 via 10.201.1.7 dev vxlan1
+
+ip route add 10.201.1.10/32 via 10.201.1.39 dev vxlan2
+ip route add 10.201.1.11/32 via 10.201.1.39 dev vxlan2
+ip route add 10.201.1.12/32 via 10.201.1.39 dev vxlan2
+ip route add 10.201.1.74/32 via 10.201.1.39 dev vxlan2
+ip route add 10.201.1.75/32 via 10.201.1.39 dev vxlan2
+ip route add 10.201.1.76/32 via 10.201.1.39 dev vxlan2
+
+ip route add 10.201.1.42/32 via 10.201.1.7 dev vxlan3
+ip route add 10.201.1.43/32 via 10.201.1.7 dev vxlan3
+ip route add 10.201.1.44/32 via 10.201.1.7 dev vxlan3
+ip route add 10.201.1.74/32 via 10.201.1.39 dev vxlan3
+ip route add 10.201.1.75/32 via 10.201.1.39 dev vxlan3
+ip route add 10.201.1.76/32 via 10.201.1.39 dev vxlan3
