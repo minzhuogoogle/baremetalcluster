@@ -19,12 +19,12 @@ There are multiple load-balance schemes for Bare-Metal Cluster. Here we use a hy
 
 2. Multi-cluster in different networks
 
-  2.1 Build multiple BM clusters
+   2.1 Build multiple BM clusters
   
-  2.2 Build gateway VM which has Vxlan interface per cluster
+   2.2 Build gateway VM which has Vxlan interface per cluster
   
-  2.3 On all control nodes add routers to L2 subnet in the other cluster
+   2.3 On all control nodes add routers to L2 subnet in the other cluster
   
-  2.3 On all nodes add routers to load-balancer in the other cluster
+   2.3 On all nodes add routers to load-balancer in the other cluster
   *Bootstrap can be used as the gateway too ideally. 
 
