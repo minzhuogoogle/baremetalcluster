@@ -483,17 +483,17 @@ EOF
 # A new VPC with random identifier will be created.
 #
 PROJECT_ID=$(gcloud config get-value project)
-
+echo
 echo
 echo
 echo "=================================================================================="
 echo "Syntax:"
 echo "=================================================================================="
-echo "./mbmc-deployer.sh [cluster_index] [differnet_network [1|0]] [Number of clusters]"
+echo "./mbmc-deployer.sh [Version] [Number of clusters] [differnet_network [1|0]]"
 echo
-echo "      Cluster_index: integer from 0 to 255. By default it is 1."
-echo "      Same or diff network: 1 is to use different network. By default, it is 1."
+echo "      Version: Anthos BareMetal Release"
 echo "      Number of clusters: integer from 1 to 8. By default it is 2."
+echo "      Same or diff network: 1 is to use different network. By default, it is 1."
 echo
 echo "Note:"
 echo "    By default, region is set to \"us-central1\", zone is set to \"us-central1-c\"."
@@ -502,32 +502,37 @@ echo
 echo "    The script, by default, uses GCP project set in the env where you run the script."
 echo "    Run gcloud config get-value projectid to check your current project id."
 echo "    Run gcloud config set project [projectid] to set to a new project."
+echo 
 echo
-
 
 #################################
 # These are hard-coded variables.
 region=us-central1
 zone=us-central1-c
+cluster_index=1
+vmip0=2
+vxlanip0=2
+vxlanindex=1
 #################################
+
 if [ -z "$1" ]
 then
-    cluster_index=1
+    version=1.6.1
     mnetworkflag=1
     totalclusters=2
 else
-    cluster_index=$1
+    version=$1
     if [ -z "$2" ]
     then
-      mnetworkflag=1
       totalclusters=2
+      mnetworkflag=1
     else
-      mnetworkflag=$2
+      totalclusters=$2
       if [ -z "$3" ]
       then
-        totalclusters=2
+        mnetworkflag=1
       else
-        totalclusters=$3
+        mnetworkflag=$3
       fi
     fi
 fi
