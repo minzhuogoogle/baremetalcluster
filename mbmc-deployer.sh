@@ -154,6 +154,24 @@ EOF
 done
 }
 
+wait_for_ssh_enable() {
+  declare -a VMs=("$VM_WS" "$VM_CP0" "$VM_W0" "$VM_W1" "$VM_W2" "$VM_GW")
+  retry=0
+  for vm in "${VMs[@]}"
+  do
+    while ! gcloud compute ssh root@$vm --zone $zone --command "echo SSH to $vm succeeded" "${EXTRA_SSH_ARGS[@]}"
+    do
+        echo "Trying to SSH into $vm failed. Sleeping for 5 seconds. zzzZZzzZZ"
+        sleep  5
+    done
+    retry=$((retry+1))
+    if [ $retry -gt 30 ];then
+       echo "ssh to $vm fails."
+       exit 1
+    fi
+done}
+
+
 create_vxlan() {
  declare -a VMs=("$VM_WS" "$VM_CP0" "$VM_W0" "$VM_W1" "$VM_W2" "$VM_GW")
  if [ $mnetworkflag -eq 1 ]; then
@@ -563,6 +581,7 @@ create_vpc
 until [ $loop -eq $totalclusters ]; do
   setup_local_variable
   create_vm
+  wait_for_ssh_enable
   if [ $mnetworkflag -eq 1 ]; then
      enable_ip_forwarding
      enable_routing_node
