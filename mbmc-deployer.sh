@@ -162,7 +162,6 @@ create_vxlan() {
     vlan_index=$ip1
  fi
  interface=vxlan$vlan_index
- ip0=2
  for vm in "${VMs[@]}"; do
    ipvxlan=10.201.$ip1.$ip0
    gcloud compute ssh root@$vm --zone $zone "${EXTRA_SSH_ARGS[@]}" << EOF
