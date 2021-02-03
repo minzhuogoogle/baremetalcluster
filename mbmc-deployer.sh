@@ -575,6 +575,7 @@ declare -ga GVMs=()
 loop=0
 vm_index=1
 vm_ip0=2
+ip0=2
 setup_gcp_env
 setup_global_variable
 create_vpc
