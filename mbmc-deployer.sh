@@ -363,7 +363,7 @@ prepare_admin_ws() {
    #### Bare Metal Prod image is : gs://anthos-baremetal-release
    #### Bare Metal Staging image is : gs://anthos-baremetal-staging
    #### To use Staging image please talk to Bare Metal Team.
-   gsutil cp gs://anthos-baremetal-staging/bmctl/$version/linux-amd64/bmctl .
+   gsutil cp gs://anthos-baremetal-release/bmctl/$version/linux-amd64/bmctl .
    chmod a+x bmctl
    mv bmctl /usr/local/sbin/
    cd ~
