@@ -40,10 +40,13 @@ There are multiple load-balance schemes for Bare-Metal Cluster. Here we use a hy
 ### Note
 
 By default, region is set to \"us-east1\", zone is set to \"us-east1-c\".
+
 Please notice not all regions allows to deploy vm using machine type \"Intel Haswel\".
 
 The script, by default, uses GCP project set in the env where you run the script.
+
 Run gcloud config get-value projectid to check your current project id.
+
 Run gcloud config set project [projectid] to set to a new project.
 
 
