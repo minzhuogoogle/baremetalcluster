@@ -34,12 +34,12 @@ There are multiple load-balance schemes for Bare-Metal Cluster. Here we use a hy
 ./mbmc-deployer.sh [Version] [Number of clusters] [differnet_network [1|0]]
 
  * Version: Anthos BareMetal Release"
- * Number of clusters: integer from 1 to 8. By default it is 2."
- * Same or diff network: 1 is to use different network. By default, it is 1."
+ * Number of clusters: integer from 1 to 8. By default it is 2.
+ * Same or diff network: 1 is to use different network. By default, it is 1.
 
 ### Note
 
-* By default, region is set to \"us-east1\", zone is set to \"us-east1-c\".
+* By default, region is set to \"us-central1\", zone is set to \"us-central1-c\".
 
 * Please notice not all regions allows to deploy vm using machine type \"Intel Haswel\".
 
