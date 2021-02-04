@@ -30,14 +30,23 @@ There are multiple load-balance schemes for Bare-Metal Cluster. Here we use a hy
        *Bootstrap can be used as the gateway too ideally. 
        
 ### Usage
-./mbmc-deployer.sh [cluster_index] [differnet_network [1|0]] [Number of clusters]
 
-      Cluster_index: integer from 0 to 255. By default it is 1.
-      Same or diff network: 1 is to use different network. By default, it is 1.
-      Number of clusters: integer from 1 to 16. By default it is 2.
-      
-      Please download all files to the same directory before running this tool.
-      
+./mbmc-deployer.sh [Version] [Number of clusters] [differnet_network [1|0]]
+
+ Version: Anthos BareMetal Release"
+ Number of clusters: integer from 1 to 8. By default it is 2."
+ Same or diff network: 1 is to use different network. By default, it is 1."
+
+### Note
+
+By default, region is set to \"us-east1\", zone is set to \"us-east1-c\".
+Please notice not all regions allows to deploy vm using machine type \"Intel Haswel\".
+
+The script, by default, uses GCP project set in the env where you run the script.
+Run gcloud config get-value projectid to check your current project id.
+Run gcloud config set project [projectid] to set to a new project.
+
+
 
 
 
