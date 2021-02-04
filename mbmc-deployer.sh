@@ -356,7 +356,7 @@ prepare_admin_ws() {
    gcloud compute ssh root@$VM_WS --zone $zone "${EXTRA_SSH_ARGS[@]}" << EOF
    curl -LO "https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl"
    chmod +x kubectl
-   mv kubectl /usr/local/sbin/:w
+   mv kubectl /usr/local/sbin/kubectl
 
    mkdir baremetal && cd baremetal
    ##### If you want to use image from other source, you can change it here.
