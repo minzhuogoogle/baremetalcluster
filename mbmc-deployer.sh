@@ -851,8 +851,6 @@ until [ $loop -eq $totalclusters ]; do
   GVMs+=("$VM_W2")
 done
 
-
-exit
 echo "Finishing all clusters creation!"
 echo
 echo
