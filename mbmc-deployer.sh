@@ -412,13 +412,15 @@ build_connectivity() {
   declare -a VMs=("$VM_CP0" "$VM_W0"  "$VM_W1" "$VM_W2")
   for vm in "${VMs[@]}"; do
     case ${vm} in
-          bm-vm-c0-bmc*)
+          #bm-vm-c0-bmc*|)
+	  bm-vm-c*|bm-vm-w*)
             if [  $mnetworkflag -eq 1 ]; then
                 populate_route_table_controlnode $vm $cluster_index
             fi
             ;;
           bm-vm-w0-bmc*|bm-vm-w1-bmc*|bm-vm-w2-bmc*)
-            populate_route_table_worknode $vm $cluster_index
+	    echo "skip"
+            #populate_route_table_worknode $vm $cluster_index
             ;;
     esac
   done
