@@ -426,6 +426,48 @@ build_connectivity() {
   done
 }
 
+setup_vm_startup_script() {
+ declare -a VMs=("$VM_WS" "$VM_CP0" "$VM_W0" "$VM_W1" "$VM_W2" "$VM_GW")
+ if [ $mnetworkflag -eq 1 ]; then
+    vxlan_index=$cluster_index
+ else
+    vxlan_index=1
+ fi
+ interface=vxlan$vxlan_index
+ for vm in "${VMs[@]}"; do
+   declare -a cmdlist=()
+   ipvxlan=10.201.1.$vxip0
+   cmd="ip link add $interface type vxlan id $vxlan_index dev ens4 dstport $vxlan_index"
+   cat <<EOF > $vm-startup.script
+   $cmd
+EOF
+   current_ip=$(gcloud compute instances describe $vm --zone $zone --format='get(networkInterfaces[0].networkIP)')
+   for ip in ${GIPs[@]}; do
+       if [ "$ip" != "$current_ip" ]; then
+          cmd="bridge fdb append to 00:00:00:00:00:00 dst $ip dev $interface"
+          cat <<EOF >> $vm-startup.script
+      $cmd
+EOF
+       fi
+   done
+   if [ $mnetworkflag -eq 1 ]; then
+      cmd="ip addr add $ipvxlan/27 dev $interface"
+   else
+      cmd="ip addr add $ipvxlan/24 dev $interface"
+   fi
+   cat <<EOF >> $vm-startup.script
+      $cmd
+EOF
+   cmd="ip link set up dev $interface"
+   cat <<EOF >> $vm-startup.script
+      $cmd
+EOF
+   gcloud compute instances add-metadata $vm --zone $zone \
+   --metadata-from-file startup-script=$vm-startup.script
+  done
+}
+
+
 create_vxlan() {
  declare -a VMs=("$VM_WS" "$VM_CP0" "$VM_W0" "$VM_W1" "$VM_W2" "$VM_GW")
  if [ $mnetworkflag -eq 1 ]; then
@@ -835,6 +877,7 @@ until [ $loop -eq $totalclusters ]; do
      prepare_admin_ws
      prepare_ssh_key
   fi
+  setup_vm_startup_script
   create_vxlan
   if [ $mnetworkflag -eq 1 ]; then
     enable_ip_forwarding
