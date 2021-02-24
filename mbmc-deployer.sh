@@ -341,7 +341,6 @@ create_vm() {
               --image-family=ubuntu-2004-lts --image-project=ubuntu-os-cloud \
               --boot-disk-size 200G \
               --boot-disk-type pd-ssd \
-              --can-ip-forward \
               --network $VPC \
               --zone $zone \
               --tags http-server,https-server,cluster-$cluster_index \
