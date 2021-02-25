@@ -37,6 +37,18 @@ There are multiple load-balance schemes for Bare-Metal Cluster. Here we use a hy
  * Number of clusters: integer from 1 to 8. By default it is 2.
  * Same or diff network: 1 is to use different network. By default, it is 1.
 
+#### Sample 1: create one BM cluster
+./mbmc-deployer.sh 1.6.1 1 
+
+#### Sample 2: create 2 BM clusters in different networks
+./mbmc-deployer.sh 1.6.1 2 
+
+#### Sample 3: create 2 BM clusters in the same network
+./mbmc-deployer.sh 1.6.1 2 0
+
+#### Sample 4: create 8 BM clusters in the same network
+./mbmc-deployer.sh 1.6.1 8 0
+
 ### Note
 
 * By default, region is set to \"us-central1\", zone is set to \"us-central1-c\".
