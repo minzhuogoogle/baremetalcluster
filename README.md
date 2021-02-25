@@ -61,6 +61,8 @@ There are multiple load-balance schemes for Bare-Metal Cluster. Here we use a hy
 
 * Run gcloud config set project [projectid] to set to a new project.
 
+* After VM rebooting all routing table will be lost.  Connection between 2 clusters in different network will not work after rebooting.
+
 
 
 
