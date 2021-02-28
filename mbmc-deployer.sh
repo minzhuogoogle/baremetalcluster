@@ -493,6 +493,7 @@ build_connectivity() {
           bm-vm-c*|bm-vm-w*)
             if [  $mnetworkflag -eq 1 ]; then
                 populate_route_table_node $vm $cluster_index
+                add_route_table_node_startup $vm $cluster_index
             fi
             ;;
           bm-vm-w0-bmc*|bm-vm-w1-bmc*|bm-vm-w2-bmc*)
@@ -980,7 +981,6 @@ until [ $loop -eq $totalclusters ]; do
   if [ $mnetworkflag -eq 1 ]; then
     enable_ip_forwarding
     build_connectivity
-    add_route_table_node_startup
   fi
   update_vm_startup_script
   install_standard_pkt
