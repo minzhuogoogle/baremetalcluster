@@ -58,6 +58,13 @@ Note: You need to have project owner's role to run the script.
 #### Sample 4: create 8 BM clusters in the same network
 ./mbmc-deployer.sh 1.6.1 8 0
 
+
+### Cleanup
+The script has a hidden option to clear all resources used for Bare Metal cluster.
+#### Usage
+* ./mbmc-deployer.sh delete : delete all resource with prefix as "abm-"
+* ./mbmc-deployer.sh delete [string]: delete all resource with [string] in the name. 
+
 ### Note
 
 * By default, region is set to \"us-central1\", zone is set to \"us-central1-c\".
@@ -69,12 +76,6 @@ Note: You need to have project owner's role to run the script.
 * Run gcloud config get-value projectid to check your current project id.
 
 * Run gcloud config set project [projectid] to set to a new project.
-
-### Cleanup
-The script has a hidden option to clear all resources used for Bare Metal cluster.
-#### Usage
-* ./mbmc-deployer.sh delete : delete all resource with prefix as "abm-"
-* ./mbmc-deployer.sh delete [string]: delete all resource with [string] in the name. 
 
 
 
