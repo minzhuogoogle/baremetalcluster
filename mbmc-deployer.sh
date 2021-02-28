@@ -635,7 +635,7 @@ prepare_admin_ws() {
    echo "Installing docker"
    curl -fsSL https://get.docker.com -o get-docker.sh
    sh get-docker.sh
-   curl -L https://istio.io/downloadIstio | sh -
+   curl -L https://istio.io/downloadIstio | ISTIO_VERSION=1.9.0 TARGET_ARCH=x86_64 sh -
    curl -OL https://raw.githubusercontent.com/minzhuogoogle/baremetalcluster/main/nginx.yaml
 EOF
    if [ $retcode -ne 0 ]; then
@@ -790,7 +790,7 @@ install_asm() {
   gcloud compute ssh root@$VM_WS --zone $zone "${EXTRA_SSH_ARGS[@]}" << EOF
   export clustername=$clustername
   set -x
-  dirname=`ls -latr | grep istio | cut -d ' ' -f12`
+  dirname=istio-1.9.0
   cd $dirname
   export PATH=$PWD/bin:$PATH
   export KUBECONFIG=/root/bmctl-workspace/$clustername/$clustername-kubeconfig
