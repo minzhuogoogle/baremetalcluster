@@ -2,6 +2,19 @@
 
 declare -a regions=("us-central1" "us-east1")
 
+stringinstring() {
+    reqsubstr="$1"
+    shift
+    string="$@"
+    if [ -z "${string##*$reqsubstr*}" ] ;then
+        echo "String '$string' contain substring: '$reqsubstr'.";
+        return 1
+    else
+        echo "String '$string' doesn't contain substring: '$reqsubstr'."
+        return 0
+    fi
+}
+
 delete_vm() {
     name=$1
     zone=$2
@@ -81,8 +94,7 @@ delete_subnet() {
 
 delete_route() {
     name=$1
-    region=$2
-    echo "will delete_route $name in $region"
+    echo "will delete_route $name"
     #echo "cmd: gcloud compute routes list --project $project  --filter=$region | grep $name  | cut -d ' ' -f1"
     for i in `gcloud compute routes list --filter="name:$name" | cut -d ' ' -f1`;
     do
@@ -101,28 +113,30 @@ delete_route() {
 
 delete_network() {
     name=$1
-    region=$2
     echo "will delete_network $name"
     #echo "cmd: gcloud compute  networks subnets  list --project $project   --filter=$region | grep $name  | cut -d ' ' -f1"
-    for i in `gcloud compute networks list  --filter="name:abm-vpc-$name" | cut -d ' ' -f1`;
+    for i in `gcloud compute networks list  | cut -d ' ' -f1`;
     do
-         if [ $i == "NAME" ]; then
+        echo $i
+        if [ $i == "NAME" ]; then
            continue
-         fi
-
-        echo "network to be deleted: $i  "
-        gcloud compute networks delete $i -q;
-        retval=$?
-        if [ $retval -ne 0 ]; then
-            echo "delete network $name fails."
-            return -1
+        fi
+        stringinstring $name $i
+        to_delete=$?
+        if  [ $to_delete -eq 1 ]; then
+           echo "network to be deleted: $i"
+           gcloud compute networks delete $i -q;
+           retval=$?
+           if [ $retval -ne 0 ]; then
+             echo "delete network $name fails."
+             return -1
+           fi
         fi
      done
 }
 
 delete_firewall() {
     name=$1
-    region=$2
     echo "will delete_firewall $name"
     #echo "cmd: gcloud compute firewall-rules list --project $project  --filter="NAME:$name"  --format="table(NAME)" | grep -v NAME |  cut -d ' ' -f1"
     for i in `gcloud compute firewall-rules list --filter="name:$name" --format="table(NAME)" | cut -d ' ' -f1`;
@@ -130,8 +144,8 @@ delete_firewall() {
         if [ $i == "NAME" ]; then
          continue
         fi
-        echo "firewall to be deleted: $i, $region"
-        gcloud compute firewall-rules delete $i  -q;
+        echo "firewall to be deleted: $i"
+        gcloud compute firewall-rules delete $i -q;
         retval=$?
         if [ $retval -ne 0 ]; then
             echo "delete firewall $name fails."
@@ -143,7 +157,8 @@ delete_firewall() {
 delete_hub_membership() {
   name=$1
   for i in `gcloud container hub memberships  list  | grep $name |   cut -d ' ' -f1`; do
-      echo $i; gcloud container hub memberships delete $i -q
+      echo "will delete hub membership :$i"
+      gcloud container hub memberships delete $i -q
   done
 }
 
@@ -160,14 +175,12 @@ purge_all_vpc() {
     name=$1
     for region in "${regions[@]}"
     do
-        zone=$region-c
-        echo "zone $zone in region $region "
         delete_address $name $region
         delete_subnet $name $region
     done
-    delete_route $name $i $region
-    delete_firewall $name $region
-    delete_network $name $region
+    delete_route $name
+    delete_firewall $name
+    delete_network $name
 }
 
 purge_all_resources() {
@@ -269,7 +282,7 @@ setup_global_variable() {
   fi
   VPC_PREFIX=abm-vpc
   VPC=$VPC_PREFIX-$grandomid
-  MACHINE_TYPE=n1-standard-8
+  MACHINE_TYPE=n1-standard-4
   VM_PREFIX=abm-vm-$grandomid
   VM_WS=$VM_PREFIX-admin-$grandomid-$zone
   VM_GW=$VM_PREFIX-gateway-$grandomid-$zone
