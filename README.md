@@ -31,6 +31,15 @@ There are multiple load-balance schemes for Bare-Metal Cluster. Here we use a hy
        
 ### Usage
 
+#### Get the script
+curl -OL https://raw.githubusercontent.com/minzhuogoogle/baremetalcluster/main/mbmc-deployer.sh
+chmod +x mbmc-deployer.sh
+
+#### Set GCP Env
+gcloud config set porject [project_id]
+Note: You need to have project owner's role to run the script.
+
+#### Run script
 ./mbmc-deployer.sh [Version] [Number of clusters] [differnet_network [1|0]]
 
  * Version: Anthos BareMetal Release"
