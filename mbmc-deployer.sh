@@ -638,6 +638,7 @@ prepare_admin_ws() {
    echo "Installing docker"
    curl -fsSL https://get.docker.com -o get-docker.sh
    sh get-docker.sh
+   curl -OL https://raw.githubusercontent.com/minzhuogoogle/baremetalcluster/main/nginx.yaml
    curl -L https://istio.io/downloadIstio | sh -
 EOF
    if [ $retcode -ne 0 ]; then
