@@ -415,6 +415,9 @@ create_vm() {
   fi
   for vm in ${VMs[@]}
   do
+    banner="# this is startup-script"
+    echo $banner > $vm-startup.script
+
     IP=10.0.2.$vmip0
     gcloud compute instances create $vm \
               --image-family=ubuntu-2004-lts --image-project=ubuntu-os-cloud \
@@ -505,7 +508,7 @@ setup_vm_startup_script() {
  for vm in "${VMs[@]}"; do
    ipvxlan=10.201.1.$svxip0
    cmd="ip link add $interface type vxlan id $vxlan_index dev ens4 dstport $vxlan_index"
-   echo $cmd > $vm-startup.script
+   echo $cmd >> $vm-startup.script
    current_ip=$(gcloud compute instances describe $vm --zone $zone --format='get(networkInterfaces[0].networkIP)')
    for ip in ${GIPs[@]}; do
        if [ "$ip" != "$current_ip" ]; then
