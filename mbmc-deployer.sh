@@ -804,18 +804,17 @@ install_asm() {
   gcloud compute ssh root@$VM_WS --zone $zone "${EXTRA_SSH_ARGS[@]}" << EOF
   export clustername=$clustername
   set -x
-  dirname=istio-1.8.0
-  cd $dirname
   export PATH=$PWD/bin:$PATH
   export KUBECONFIG=/root/bmctl-workspace/$clustername/$clustername-kubeconfig
-  /root/$dirname/bin/istioctl install --set profile=demo -y
+  /root/istio-1.8.0/bin/istioctl install --set profile=demo -y
   kubectl create namespace bookstore
   kubectl label namespace bookstore istio-injection=enabled
-  kubectl apply -f samples/bookinfo/platform/kube/bookinfo.yaml -n bookstore
-  kubectl apply -f samples/bookinfo/networking/bookinfo-gateway.yaml -n bookstore
-  /root/$dirname/bin/istioctl analyze
+  kubectl apply -f /root/istio-1.8.0/samples/bookinfo/platform/kube/bookinfo.yaml -n bookstore
+  kubectl apply -f /root/istio-1.8.0/samples/bookinfo/networking/bookinfo-gateway.yaml -n bookstore
+  /root/istio-1.8.0/bin/istioctl analyze
 EOF
 }
+
 
 deploy_nginx() {
   gcloud compute ssh root@$VM_WS --zone $zone "${EXTRA_SSH_ARGS[@]}" << EOF
