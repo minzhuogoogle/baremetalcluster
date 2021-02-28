@@ -70,7 +70,8 @@ Note: You need to have project owner's role to run the script.
 
 * Run gcloud config set project [projectid] to set to a new project.
 
-### The script has a hidden option to clear all resources used for Bare Metal cluster.
+### Cleanup
+The script has a hidden option to clear all resources used for Bare Metal cluster.
 #### Usage
 * ./mbmc-deployer.sh delete : delete all resource with prefix as "abm-"
 * ./mbmc-deployer.sh delete [string]: delete all resource with [string] in the name. 
