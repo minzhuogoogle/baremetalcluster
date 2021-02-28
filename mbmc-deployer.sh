@@ -1,13 +1,18 @@
 #!/usr/bin/env bash
 
+declare -a regions=("us-central1" "us-east1")
 
 delete_vm() {
     name=$1
-    echo $name
-    for i in `gcloud compute instances list --project $project --filter="zone:$zone name:$name"  | grep -v NAME |  cut -d ' ' -f1`;
+    zone=$2
+    echo "Will delete all vms with $name in zone $zone"
+    for i in `gcloud compute instances list --filter="zone:$zone name:$name" | cut -d ' ' -f1`;
     do
-        echo "vm to be deleted: $i, $project, $zone"
-        gcloud compute instances delete $i --project $project --zone $zone -q;
+        if [ $i == "NAME" ]; then
+           continue
+        fi
+        echo "vm to be deleted: $i in $zone"
+        gcloud compute instances delete $i --zone $zone -q;
         retval=$?
         if [ $retval -ne 0 ]; then
             return -1
@@ -15,16 +20,37 @@ delete_vm() {
     done
     return 0
 }
+delete_sa() {
+    name=$1
+    echo "Will delete all service accounts with $name"
+    for i in ` gcloud iam service-accounts list --filter="name:$name" | cut -d ' ' -f1`;
+    do
+        if [ $i == "NAME" ]; then
+           continue
+        fi
+        echo "service account to be deleted: $i "
+        gcloud iam service-accounts delete $i  -q;
+        retval=$?
+        if [ $retval -ne 0 ]; then
+            return -1
+        fi
+    done
+    return 0
+
+}
 
 delete_address() {
     name=$1
     region=$2
-    echo "delete_address $name $region"
+    echo "will delete_address $name in $region"
     #echo "cmd: gcloud compute addresses list --project $project --filter=$region | grep $name |  cut -d ' ' -f1"
-    for i in `gcloud compute addresses list --filter=$region | grep $name |  cut -d ' ' -f1`;
+    for i in `gcloud compute addresses list --filter="region:$region name:$name" |  cut -d ' ' -f1`;
     do
-         echo "addess to be deleted: $i, $project, $region"
-         gcloud compute addresses delete $i --project $project --region $region -q;
+         if [ $i == "NAME" ]; then
+           continue
+         fi
+         echo "addess to be deleted: $i in $region"
+         gcloud compute addresses delete $i --region $region -q;
          retval=$?
          if [ $retval -ne 0 ]; then
              return -1
@@ -35,12 +61,16 @@ delete_address() {
 delete_subnet() {
      name=$1
      region=$2
-     echo "delete_subnet $name $region"
+     echo "will delete_subnet $name in $region"
      #echo "cmd: gcloud compute  networks subnets  list --project $project   --filter=$region | grep $name  | cut -d ' ' -f1"
-     for i in `gcloud compute  networks subnets  list  --filter=$region | grep $name  | cut -d ' ' -f1`;
+     for i in `gcloud compute  networks subnets  list --filter="region:$region name:$name" | cut -d ' ' -f1`;
      do
-         echo "subnet to be deleted: $i, $project, $region"
-         gcloud compute  networks subnets delete $i --project $project --region $region -q;
+         if [ $i == "NAME" ]; then
+           continue
+         fi
+
+         echo "subnet to be deleted: $i in $region"
+         gcloud compute  networks subnets delete $i -region $region -q;
          retval=$?
          if [ $retval -ne 0 ]; then
              echo "delete vm $name fails."
@@ -52,15 +82,18 @@ delete_subnet() {
 delete_route() {
     name=$1
     region=$2
-    echo "delete_route $name $region"
+    echo "will delete_route $name in $region"
     #echo "cmd: gcloud compute routes list --project $project  --filter=$region | grep $name  | cut -d ' ' -f1"
-    for i in `gcloud compute routes list   --filter=$region | grep $name  | cut -d ' ' -f1`;
+    for i in `gcloud compute routes list --filter="name:$name" | cut -d ' ' -f1`;
     do
-        echo "route to be deleted: $i, $project, $region"
-        gcloud compute  routes delete $i --project $project -q;
+        if [ $i == "NAME" ]; then
+           continue
+        fi
+        echo "route to be deleted: $i"
+        gcloud compute routes delete $i  -q;
         retval=$?
         if [ $retval -ne 0 ]; then
-	    echo "delete route $name fails."
+            echo "delete route $name fails."
             return -1
         fi
      done
@@ -69,15 +102,19 @@ delete_route() {
 delete_network() {
     name=$1
     region=$2
-    echo "delete_network $name $region"
+    echo "will delete_network $name"
     #echo "cmd: gcloud compute  networks subnets  list --project $project   --filter=$region | grep $name  | cut -d ' ' -f1"
-    for i in `gcloud compute networks list --project $project  --filter=$region | grep $name | cut -d ' ' -f1`;
+    for i in `gcloud compute networks list  --filter="name:$name" | cut -d ' ' -f1`;
     do
-        echo "network to be deleted: $i, $project, $region"
-        gcloud compute networks  delete $i --project $project -q;
+         if [ $i == "NAME" ]; then
+           continue
+         fi
+
+        echo "network to be deleted: $i  "
+        gcloud compute networks delete $i -q;
         retval=$?
         if [ $retval -ne 0 ]; then
-	    echo "delete network $name fails."
+            echo "delete network $name fails."
             return -1
         fi
      done
@@ -86,58 +123,83 @@ delete_network() {
 delete_firewall() {
     name=$1
     region=$2
-    echo "delete_firewall $name $region"
+    echo "will delete_firewall $name"
     #echo "cmd: gcloud compute firewall-rules list --project $project  --filter="NAME:$name"  --format="table(NAME)" | grep -v NAME |  cut -d ' ' -f1"
-    for i in `gcloud compute firewall-rules list  --filter="NAME:$name"  --format="table(NAME)" | grep -v NAME |  cut -d ' ' -f1`;
+    for i in `gcloud compute firewall-rules list --filter="name:$name" --format="table(NAME)" | cut -d ' ' -f1`;
     do
-        echo "firewall to be deleted: $i, $project, $region"
-        gcloud compute firewall-rules delete $i --project $project -q;
+        if [ $i == "NAME" ]; then
+         continue
+        fi
+        echo "firewall to be deleted: $i, $region"
+        gcloud compute firewall-rules delete $i  -q;
         retval=$?
         if [ $retval -ne 0 ]; then
-	    echo "delete firewall $name fails."
+            echo "delete firewall $name fails."
             return -1
         fi
      done
 }
 
-cleanup_test() {
+delete_hub_membership() {
+  name=$1
+  for i in `gcloud container hub memberships  list  | grep $name |   cut -d ' ' -f1`; do
+      echo $i; gcloud container hub memberships delete $i -q
+  done
+}
+
+purge_all_vms() {
+  name=$1
+  for region in "${regions[@]}"
+  do
+    zone=$region-c
+    delete_vm $name $zone
+  done
+}
+
+purge_all_vpc() {
     name=$1
-    delete_vm $name
-    for i in `gcloud compute regions list  | cut -d ' ' -f1`
+    for region in "${regions[@]}"
     do
-        echo $i
-        if [[ $zone =~ $i ]]; then
-           echo "zone $zone in region $i "
-           delete_address $name $i
-           delete_subnet $name $i
-           delete_route $name $i
-           delete_network $name $i
-	   continue
-	fi   
+        zone=$region-c
+        echo "zone $zone in region $region "
+        delete_address $name $region
+        delete_subnet $name $region
+        delete_route $name $i $region
+        delete_firewall $name $region
+        delete_network $name $i $region
     done
-    delete_firewall $name
 }
 
 purge_all_resources() {
-  randomid=$1
-  if [ $randomid -eq 0 ]; then
-    vmname="bm-vm-"
-    vpcname="bm-vpc-"
+  name=$1
+  project=$2
+  gcloud config set project $2
+  if [ $name == 'abm' ]; then
+    vmname="abm-vm-"
+    vpcname="abm-vpc-"
+    clustername="abm-c-"
+    saname="abm-sa-"
   else
-    vmname=$zone-$grandomid
-    vpcname="bm-vpc-$grandomid"
+    vmname=$name
+    vpcname=$name
+    clustername=$name
+    saname=$name
   fi
-#  purge_all_vms $vnname
-#  purge_all_vpc $vpcname
+  purge_all_vms $vmname
+  purge_all_vpc $vpcname
+  delete_hub_membership $clustername
+  delete_sa $saname
 }
 
+
 setup_gcp_env() {
-  service_account=bmc-sa-$PROJECT_ID-$grandomid
+  service_account=abm-sa-$grandomid
   service_account=$(sed 's/\(.\{30\}\).*/\1/' <<< "$service_account")
+  sa_key=abm-sa-key-$grandomid
   #### If you have SA and key ready,
   ### you can set them here to skip SA and key creation.
-  #service_account=mzhuo-bare-metal
-  sa_key=bmc-sakey-$PROJECT_ID-$grandomid.json
+  #service_account=<your sa>
+  #sa_key=sa-bmc-key-csp-gke-231805
   if  [[  -f "$sa_key" ]]; then
      echo "INFO: will re-user SA $service_account@$PROJECT_ID.iam.gserviceaccount.com and SA Key $sa_key"
      return
@@ -205,13 +267,15 @@ setup_global_variable() {
   then
     EXTRA_SSH_ARGS=(-- -o ProxyCommand='corp-ssh-helper %h %p' -ServerAliveInterval=30 -o ConnectTimeout=30)
   fi
-  VPC_PREFIX=bm-vpc
+  VPC_PREFIX=abm-vpc
   VPC=$VPC_PREFIX-$grandomid
   MACHINE_TYPE=n1-standard-8
-  VM_PREFIX=bm-vm
-  VM_WS=$VM_PREFIX-admin-bmc-$zone-$grandomid
-  VM_GW=$VM_PREFIX-gateway-bmc-$zone-$grandomid
-  FIREWALL_NAME=bm-fw-$VPC-$grandomid
+  VM_PREFIX=abm-vm-$grandomid
+  VM_WS=$VM_PREFIX-admin-$grandomid-$zone
+  VM_GW=$VM_PREFIX-gateway-$grandomid-$zone
+  FIREWALL_NAME=abm-fw-$grandomid
+  SUBSET_NAME=abm-subset-$grandomid
+
   GVMs+=("$VM_WS")
   GVMs+=("$VM_GW")
   gip=2
@@ -227,26 +291,28 @@ setup_global_variable() {
 }
 
 setup_local_variable() {
-  clustername=bmc-gce-$cluster_index-$zone-$grandomid
+  clusterprefix=abm-c-$grandomid
+  clustername=$clusterprefix-$cluster_index-$zone
   if [ ${#clustername} -gt 64 ]; then
     echo "Clustername $clustername is too long, chopping it to the short one"
     clustername=$(sed 's/\(.\{63\}\).*/\1/' <<< "$clustername")
   fi
-  VM_CP0=$VM_PREFIX-c0-bmc-c$cluster_index-$zone-$grandomid
-  VM_CP1=$VM_PREFIX-c1-bmc-c$cluster_index-$zone-$grandomid
-  VM_W0=$VM_PREFIX-w0-bmc-c$cluster_index-$zone-$grandomid
-  VM_W1=$VM_PREFIX-w1-bmc-c$cluster_index-$zone-$grandomid
-  VM_W2=$VM_PREFIX-w2-bmc-c$cluster_index-$zone-$grandomid
+  VM_CP0=$VM_PREFIX-c0-c$cluster_index-$zone
+  VM_CP1=$VM_PREFIX-c1-c$cluster_index-$zone
+  VM_W0=$VM_PREFIX-w0-c$cluster_index-$zone
+  VM_W1=$VM_PREFIX-w1-c$cluster_index-$zone
+  VM_W2=$VM_PREFIX-w2-c$cluster_index-$zone
 
-  declare -a VMs=("$VM_WS" "$VM_CP0" "$VM_W0" "$VM_W1" "$VM_W2" "$VM_GW")
+  declare -a VMs=("$VM_WS" "$VM_CP0" "$VM_CP1" "$VM_W0" "$VM_W1" "$VM_W2" "$VM_GW")
   GVMs+=("$VM_CP0")
+  GVMs+=("$VM_CP1")
   GVMs+=("$VM_W0")
   GVMs+=("$VM_W1")
   GVMs+=("$VM_W2")
 }
 
 create_vpc() {
-  gcloud compute networks create $VPC --subnet-mode=custom  --bgp-routing-mode=regional
+  gcloud compute networks create $VPC --subnet-mode=custom --bgp-routing-mode=regional
   retcode=$?
   if [ $retcode -ne 0 ] ; then
     if [ ! "$VPC" = "default" ]; then
@@ -254,7 +320,7 @@ create_vpc() {
         exit 1
     fi
   fi
-  gcloud compute networks subnets create bm-cluster-$grandomid --range=10.0.2.0/24 --network=$VPC --region=$region
+  gcloud compute networks subnets create $SUBSET_NAME --range=10.0.2.0/24 --network=$VPC --region=$region
   gcloud compute firewall-rules create $FIREWALL_NAME --network $VPC --allow all
   gcloud compute project-info add-metadata --metadata enable-oslogin=FALSE
 }
@@ -263,7 +329,7 @@ populate_route_table_worknode() {
   vm=$1
   vlaninterface=$2
   echo "Ppopulate routing table for worknode $vm for cluster $((vlaninterface+1))"
-  gatewayip0=$((loop*32+7))
+  gatewayip0=$((loop*32+8))
   ncluster=0
   until [ $ncluster -eq  $totalclusters ]; do
     if [ $((ncluster+1)) -ne $vlaninterface ]; then
@@ -278,11 +344,11 @@ EOF
   done
 }
 
-populate_route_table_controlnode() {
+populate_route_table_node() {
   vm=$1
   vlaninterface=$2
   echo "Populate_route_table_for control node,  $vm for cluster $((vlaninterface+1))"
-  gatewayip0=$((loop*32+7))
+  gatewayip0=$((loop*32+8))
   subnet=0
   until [ $subnet -eq $totalclusters ]; do
      if [ $subnet -ne $loop ]; then
@@ -290,6 +356,19 @@ populate_route_table_controlnode() {
        set -x
        ip route add 10.201.1.$((subnet*32))/27 via 10.201.1.$gatewayip0 dev vxlan$vlaninterface
 EOF
+     fi
+     subnet=$((subnet+1))
+  done
+}
+
+add_route_table_node_startup() {
+  vm=$1
+  vlaninterface=$2
+  gatewayip0=$((loop*32+8))
+  subnet=0
+  until [ $subnet -eq $totalclusters ]; do
+     if [ $subnet -ne $loop ]; then
+       echo "ip route add 10.201.1.$((subnet*32))/27 via 10.201.1.$gatewayip0 dev vxlan$vlaninterface" >> $vm-startup.config
      fi
      subnet=$((subnet+1))
   done
@@ -328,10 +407,10 @@ EOF
 
 create_vm() {
   if [ $loop -gt 0 ]; then
-     declare -a VMs=("$VM_CP0" "$VM_W0" "$VM_W1" "$VM_W2")
-     declare -a IPs=("10.0.2.2" "10.0.2.7")
+     declare -a VMs=("$VM_CP0" "$VM_CP1" "$VM_W0" "$VM_W1" "$VM_W2")
+     declare -a IPs=("10.0.2.2" "10.0.2.8")
   else
-     declare -a VMs=("$VM_WS" "$VM_CP0" "$VM_W0" "$VM_W1" "$VM_W2" "$VM_GW")
+     declare -a VMs=("$VM_WS" "$VM_CP0" "$VM_CP1" "$VM_W0" "$VM_W1" "$VM_W2" "$VM_GW")
      declare -a IPs=()
   fi
   for vm in ${VMs[@]}
@@ -348,7 +427,7 @@ create_vm() {
               --scopes cloud-platform \
               --machine-type $MACHINE_TYPE \
               --private-network-ip $IP \
-              --subnet bm-cluster-$grandomid \
+              --subnet $SUBSET_NAME \
               --service-account $service_account@$PROJECT_ID.iam.gserviceaccount.com
     retcode=$?
     if [ $retcode -ne 0 ]; then
@@ -360,7 +439,7 @@ create_vm() {
     vmip0=$((vmip0+1))
     vm_index=$((vm_index+1))
   done
-  if [ ${#IPs[@]} -ne 6 ]; then
+  if [ ${#IPs[@]} -ne 7 ]; then
       echo "IP table building failure, exit"
       exit 1
   fi
@@ -368,9 +447,9 @@ create_vm() {
 
 wait_for_ssh() {
   if [ $loop -gt 0 ]; then
-     declare -a VMs=("$VM_CP0" "$VM_W0" "$VM_W1" "$VM_W2")
+     declare -a VMs=("$VM_CP0" "$VM_CP1" "$VM_W0" "$VM_W1" "$VM_W2")
   else
-     declare -a VMs=("$VM_WS" "$VM_CP0" "$VM_W0" "$VM_W1" "$VM_W2" "$VM_GW")
+     declare -a VMs=("$VM_WS" "$VM_CP0" "$VM_CP1" "$VM_W0" "$VM_W1" "$VM_W2" "$VM_GW")
   fi
   retry_count=0
   for vm in "${VMs[@]}"
@@ -389,7 +468,7 @@ wait_for_ssh() {
 }
 
 install_standard_pkt() {
-  declare -a VMs=("$VM_WS" "$VM_CP0" "$VM_W0" "$VM_W1" "$VM_W2" "$VM_GW")
+  declare -a VMs=("$VM_WS" "$VM_CP0" "$VM_CP1" "$VM_W0" "$VM_W1" "$VM_W2" "$VM_GW")
   for vm in "${VMs[@]}"
   do
     gcloud compute ssh root@$vm --zone $zone "${EXTRA_SSH_ARGS[@]}" << EOF
@@ -408,25 +487,23 @@ EOF
 }
 
 build_connectivity() {
-  declare -a VMs=("$VM_CP0" "$VM_W0"  "$VM_W1" "$VM_W2")
+  declare -a VMs=("$VM_CP0" "$VM_CP1" "$VM_W0" "$VM_W1" "$VM_W2")
   for vm in "${VMs[@]}"; do
     case ${vm} in
-          #bm-vm-c0-bmc*|)
-	  bm-vm-c*|bm-vm-w*)
+          bm-vm-c*|bm-vm-w*)
             if [  $mnetworkflag -eq 1 ]; then
-                populate_route_table_controlnode $vm $cluster_index
+                populate_route_table_node $vm $cluster_index
             fi
             ;;
           bm-vm-w0-bmc*|bm-vm-w1-bmc*|bm-vm-w2-bmc*)
-	    echo "skip"
-            #populate_route_table_worknode $vm $cluster_index
+            echo "skip"
             ;;
     esac
   done
 }
 
 setup_vm_startup_script() {
- declare -a VMs=("$VM_WS" "$VM_CP0" "$VM_W0" "$VM_W1" "$VM_W2" "$VM_GW")
+ declare -a VMs=("$VM_WS" "$VM_CP0" "$VM_CP1" "$VM_W0" "$VM_W1" "$VM_W2" "$VM_GW")
  if [ $mnetworkflag -eq 1 ]; then
     vxlan_index=$cluster_index
  else
@@ -434,19 +511,14 @@ setup_vm_startup_script() {
  fi
  interface=vxlan$vxlan_index
  for vm in "${VMs[@]}"; do
-   declare -a cmdlist=()
-   ipvxlan=10.201.1.$vxip0
+   ipvxlan=10.201.1.$svxip0
    cmd="ip link add $interface type vxlan id $vxlan_index dev ens4 dstport $vxlan_index"
-   cat <<EOF > $vm-startup.script
-   $cmd
-EOF
+   echo $cmd > $vm-startup.script
    current_ip=$(gcloud compute instances describe $vm --zone $zone --format='get(networkInterfaces[0].networkIP)')
    for ip in ${GIPs[@]}; do
        if [ "$ip" != "$current_ip" ]; then
           cmd="bridge fdb append to 00:00:00:00:00:00 dst $ip dev $interface"
-          cat <<EOF >> $vm-startup.script
-      $cmd
-EOF
+          echo $cmd >> $vm-startup.script
        fi
    done
    if [ $mnetworkflag -eq 1 ]; then
@@ -454,13 +526,17 @@ EOF
    else
       cmd="ip addr add $ipvxlan/24 dev $interface"
    fi
-   cat <<EOF >> $vm-startup.script
-      $cmd
-EOF
+   echo $cmd >> $vm-startup.script
    cmd="ip link set up dev $interface"
-   cat <<EOF >> $vm-startup.script
-      $cmd
-EOF
+   echo $cmd >> $vm-startup.script
+   svxip0=$((svxip0+1))
+  done
+  svxip0=$((svxip0+7))
+}
+
+update_vm_startup_script() {
+ declare -a VMs=("$VM_WS" "$VM_CP0" "$VM_CP1" "$VM_W0" "$VM_W1" "$VM_W2" "$VM_GW")
+ for vm in "${VMs[@]}"; do
    gcloud compute instances add-metadata $vm --zone $zone \
    --metadata-from-file startup-script=$vm-startup.script
   done
@@ -468,7 +544,7 @@ EOF
 
 
 create_vxlan() {
- declare -a VMs=("$VM_WS" "$VM_CP0" "$VM_W0" "$VM_W1" "$VM_W2" "$VM_GW")
+ declare -a VMs=("$VM_WS" "$VM_CP0" "$VM_CP1" "$VM_W0" "$VM_W1" "$VM_W2" "$VM_GW")
  if [ $mnetworkflag -eq 1 ]; then
     vxlan_index=$cluster_index
  else
@@ -577,6 +653,8 @@ EOF
    gcloud compute ssh root@$VM_WS --zone $zone "${EXTRA_SSH_ARGS[@]}" << EOF
    sudo bash -c 'echo 1 > /proc/sys/net/ipv4/ip_forward'
 EOF
+   echo "sudo bash -c 'echo 1 > /proc/sys/net/ipv4/ip_forward'" >> $VM_GW-startup.script
+   echo "sudo bash -c 'echo 1 > /proc/sys/net/ipv4/ip_forward'" >> $VM_WS-startup.script
 }
 
 prepare_ssh_key() {
@@ -595,7 +673,7 @@ EOF
 }
 
 copy_ssh_key_to_vms() {
-  declare -a VMs=("$VM_CP0" "$VM_W0" "$VM_W1" "$VM_W2" "$VM_GW")
+  declare -a VMs=("$VM_CP0" "$VM_CP1" "$VM_W0" "$VM_W1" "$VM_W2" "$VM_GW")
   for vm in ${VMs[@]}; do
     gcloud compute instances add-metadata $vm --zone $zone --metadata-from-file ssh-keys=ssh-metadata-$grandomid
     retcode=$?
@@ -613,6 +691,7 @@ prepare_bmc_config() {
   export clustername=$clustername
   export sa_key=$sa_key
   export CP0IP=$CP0IP
+  export CP1IP=$CP1IP
   export W0IP=$W0IP
   export W1IP=$W1IP
   export W2IP=$W2IP
@@ -656,6 +735,7 @@ spec:
       clusterName: \$clustername
       nodes:
       - address: \$CP0IP
+      - address: \$CP1IP
   clusterNetwork:
     pods:
       cidrBlocks:
@@ -712,15 +792,16 @@ install_asm() {
   gcloud compute ssh root@$VM_WS --zone $zone "${EXTRA_SSH_ARGS[@]}" << EOF
   export clustername=$clustername
   set -x
-  cd istio-1.8.2
+  dirname=`ls -latr | grep istio | cut -d ' ' -f12`
+  cd $dirname
   export PATH=$PWD/bin:$PATH
   export KUBECONFIG=/root/bmctl-workspace/$clustername/$clustername-kubeconfig
-  /root/istio-1.8.2/bin/istioctl install --set profile=demo -y
+  /root/$dirname/bin/istioctl install --set profile=demo -y
   kubectl create namespace bookstore
   kubectl label namespace bookstore istio-injection=enabled
   kubectl apply -f samples/bookinfo/platform/kube/bookinfo.yaml -n bookstore
   kubectl apply -f samples/bookinfo/networking/bookinfo-gateway.yaml -n bookstore
-  /root/istio-1.8.2/bin/istioctl analyze
+  /root/$dirname/bin/istioctl analyze
 EOF
 }
 
@@ -770,6 +851,26 @@ EOF
 #
 
 PROJECT_ID=$(gcloud config get-value project)
+
+### TODO: hiddlen cmd to delete all resource links to grandomid, if not given
+### delete all resouce with affnix bm.
+if [ "$1" == "delete" ]; then
+  if [ -z "$2" ]
+  then
+      name=abm
+  else
+      name=$2
+  fi
+  echo "Note:"
+  echo "Do you want to delete all resources (vm, vpc and hub membership and etc) with "
+  echo "\"$name\" in name?"
+  echo "If not, you can press ctrl-c to exit"
+  sleep 10
+  purge_all_resources $name $PROJECT_ID
+  exit 0
+fi
+
+
 echo
 echo
 echo "=================================================================================="
@@ -823,11 +924,6 @@ else
     fi
 fi
 
-### TODO: hiddlen cmd to delete all resource links to grandomid.
-if [ "$version" == "delete" ]; then
-  # purge_all_resources $2
-  echo "Under Constrution"
-fi
 
 if [ $mnetworkflag -eq 1 ]; then
   region=us-central1
@@ -843,7 +939,7 @@ if [ $totalclusters -gt 8 ]; then
 fi
 
 
-totalnumofvm=$((totalclusters*4+2))
+totalnumofvm=$((totalclusters*5+2))
 # By default the first cluster used vlan index same as cluster index
 grandomid=$(( $RANDOM % 9999999999 ))
 echo "The script is going to build $totalnumofvm VMs in $PROJECT_ID."
@@ -869,6 +965,7 @@ setup_global_variable
 create_vpc
 until [ $loop -eq $totalclusters ]; do
   vxip0=$((loop*32+2))
+  svxip0=$((loop*32+2))
   setup_local_variable
   create_vm
   wait_for_ssh
@@ -876,12 +973,15 @@ until [ $loop -eq $totalclusters ]; do
      prepare_admin_ws
      prepare_ssh_key
   fi
-  setup_vm_startup_script
+  prepare_vm_startup_script
   create_vxlan
+  setup_vm_startup_script
   if [ $mnetworkflag -eq 1 ]; then
     enable_ip_forwarding
     build_connectivity
+    add_route_table_node_startup
   fi
+  update_vm_startup_script
   install_standard_pkt
   copy_ssh_key_to_vms
   prepare_bmc_config
@@ -890,6 +990,7 @@ until [ $loop -eq $totalclusters ]; do
   cluster_index=$((cluster_index+1))
   loop=$((loop+1))
   GVMs+=("$VM_CP0")
+  GVMs+=("$VM_CP1")
   GVMs+=("$VM_W0")
   GVMs+=("$VM_W1")
   GVMs+=("$VM_W2")
