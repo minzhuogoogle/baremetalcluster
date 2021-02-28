@@ -20,6 +20,7 @@ delete_vm() {
     done
     return 0
 }
+
 delete_sa() {
     name=$1
     echo "Will delete all service accounts with $name"
@@ -36,7 +37,6 @@ delete_sa() {
         fi
     done
     return 0
-
 }
 
 delete_address() {
@@ -63,14 +63,14 @@ delete_subnet() {
      region=$2
      echo "will delete_subnet $name in $region"
      #echo "cmd: gcloud compute  networks subnets  list --project $project   --filter=$region | grep $name  | cut -d ' ' -f1"
-     for i in `gcloud compute  networks subnets  list --filter="region:$region name:$name" | cut -d ' ' -f1`;
+     for i in `gcloud compute  networks subnets  list --filter="name:$name region:$region" | cut -d ' ' -f1`;
      do
          if [ $i == "NAME" ]; then
            continue
          fi
 
          echo "subnet to be deleted: $i in $region"
-         gcloud compute  networks subnets delete $i -region $region -q;
+         gcloud compute  networks subnets delete $i --region $region -q;
          retval=$?
          if [ $retval -ne 0 ]; then
              echo "delete vm $name fails."
@@ -104,7 +104,7 @@ delete_network() {
     region=$2
     echo "will delete_network $name"
     #echo "cmd: gcloud compute  networks subnets  list --project $project   --filter=$region | grep $name  | cut -d ' ' -f1"
-    for i in `gcloud compute networks list  --filter="name:$name" | cut -d ' ' -f1`;
+    for i in `gcloud compute networks list  --filter="name:abm-vpc-$name" | cut -d ' ' -f1`;
     do
          if [ $i == "NAME" ]; then
            continue
@@ -164,10 +164,10 @@ purge_all_vpc() {
         echo "zone $zone in region $region "
         delete_address $name $region
         delete_subnet $name $region
-        delete_route $name $i $region
-        delete_firewall $name $region
-        delete_network $name $i $region
     done
+    delete_route $name $i $region
+    delete_firewall $name $region
+    delete_network $name $region
 }
 
 purge_all_resources() {
@@ -198,7 +198,7 @@ setup_gcp_env() {
   sa_key=abm-sa-key-$grandomid
   #### If you have SA and key ready,
   ### you can set them here to skip SA and key creation.
-  #service_account=<your sa>
+  #service_account=mzhuo-bare-metal
   #sa_key=sa-bmc-key-csp-gke-231805
   if  [[  -f "$sa_key" ]]; then
      echo "INFO: will re-user SA $service_account@$PROJECT_ID.iam.gserviceaccount.com and SA Key $sa_key"
@@ -328,7 +328,7 @@ create_vpc() {
 populate_route_table_worknode() {
   vm=$1
   vlaninterface=$2
-  echo "Ppopulate routing table for worknode $vm for cluster $((vlaninterface+1))"
+  echo "Populate routing table for worknode $vm for cluster $((vlaninterface+1))"
   gatewayip0=$((loop*32+8))
   ncluster=0
   until [ $ncluster -eq  $totalclusters ]; do
@@ -368,6 +368,7 @@ add_route_table_node_startup() {
   subnet=0
   until [ $subnet -eq $totalclusters ]; do
      if [ $subnet -ne $loop ]; then
+       echo "Add cli for routing"
        echo "ip route add 10.201.1.$((subnet*32))/27 via 10.201.1.$gatewayip0 dev vxlan$vlaninterface" >> $vm-startup.script
      fi
      subnet=$((subnet+1))
@@ -417,7 +418,6 @@ create_vm() {
   do
     banner="# this is startup-script"
     echo $banner > $vm-startup.script
-
     IP=10.0.2.$vmip0
     gcloud compute instances create $vm \
               --image-family=ubuntu-2004-lts --image-project=ubuntu-os-cloud \
@@ -483,7 +483,7 @@ install_standard_pkt() {
 EOF
     retcode=$?
     if [ $retcode -ne 0 ]; then
-       echo "Fail to install pkges on $vm"
+       echo "Fail to install pkgs on $vm"
        exit 1
     fi
   done
@@ -492,8 +492,10 @@ EOF
 build_connectivity() {
   declare -a VMs=("$VM_CP0" "$VM_CP1" "$VM_W0" "$VM_W1" "$VM_W2")
   for vm in "${VMs[@]}"; do
-     populate_route_table_node $vm $cluster_index
-     add_route_table_node_startup $vm $cluster_index    
+    if [  $mnetworkflag -eq 1 ]; then
+       populate_route_table_node $vm $cluster_index
+       add_route_table_node_startup $vm $cluster_index
+    fi
   done
 }
 
@@ -633,8 +635,8 @@ prepare_admin_ws() {
    echo "Installing docker"
    curl -fsSL https://get.docker.com -o get-docker.sh
    sh get-docker.sh
-   curl -OL https://raw.githubusercontent.com/minzhuogoogle/baremetalcluster/main/nginx.yaml
    curl -L https://istio.io/downloadIstio | sh -
+   curl -OL https://raw.githubusercontent.com/minzhuogoogle/baremetalcluster/main/nginx.yaml
 EOF
    if [ $retcode -ne 0 ]; then
        echo "Fail to prepare $VM_WS"
@@ -938,6 +940,7 @@ fi
 totalnumofvm=$((totalclusters*5+2))
 # By default the first cluster used vlan index same as cluster index
 grandomid=$(( $RANDOM % 9999999999 ))
+#grandomid=23029
 echo "The script is going to build $totalnumofvm VMs in $PROJECT_ID."
 echo "    Region: $region"
 echo "    Zone: $zone"
