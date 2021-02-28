@@ -211,10 +211,11 @@ setup_gcp_env() {
   sa_key=abm-sa-key-$grandomid
   #### If you have SA and key ready,
   ### you can set them here to skip SA and key creation.
+  ### This helps since there is Quota for number of SA.
   #service_account=mzhuo-bare-metal
   #sa_key=sa-bmc-key-csp-gke-231805
   if  [[  -f "$sa_key" ]]; then
-     echo "INFO: will re-user SA $service_account@$PROJECT_ID.iam.gserviceaccount.com and SA Key $sa_key"
+     echo "INFO: will re-use SA $service_account@$PROJECT_ID.iam.gserviceaccount.com and SA Key $sa_key"
      return
   fi
   gcloud services enable \
@@ -648,7 +649,7 @@ prepare_admin_ws() {
    echo "Installing docker"
    curl -fsSL https://get.docker.com -o get-docker.sh
    sh get-docker.sh
-   curl -L https://istio.io/downloadIstio | ISTIO_VERSION=1.9.0 TARGET_ARCH=x86_64 sh -
+   curl -L https://istio.io/downloadIstio | ISTIO_VERSION=1.8.0 TARGET_ARCH=x86_64 sh -
    curl -OL https://raw.githubusercontent.com/minzhuogoogle/baremetalcluster/main/nginx.yaml
 EOF
    if [ $retcode -ne 0 ]; then
@@ -803,7 +804,7 @@ install_asm() {
   gcloud compute ssh root@$VM_WS --zone $zone "${EXTRA_SSH_ARGS[@]}" << EOF
   export clustername=$clustername
   set -x
-  dirname=istio-1.9.0
+  dirname=istio-1.8.0
   cd $dirname
   export PATH=$PWD/bin:$PATH
   export KUBECONFIG=/root/bmctl-workspace/$clustername/$clustername-kubeconfig
@@ -945,7 +946,7 @@ else
 fi
 
 if [ $totalclusters -gt 8 ]; then
-  echo "Total number of clusters should  be less than or equal to 16."
+  echo "Total number of clusters should be less than or equal to 16."
   exit 1
 fi
 
@@ -953,7 +954,9 @@ fi
 totalnumofvm=$((totalclusters*5+2))
 # By default the first cluster used vlan index same as cluster index
 grandomid=$(( $RANDOM % 9999999999 ))
-#grandomid=23029
+# fix randomid, if you fix it, you need to remove the failure check
+# for vpc, vm and etc
+# grandomid=21138
 echo "The script is going to build $totalnumofvm VMs in $PROJECT_ID."
 echo "    Region: $region"
 echo "    Zone: $zone"
