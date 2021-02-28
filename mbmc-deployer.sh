@@ -368,7 +368,7 @@ add_route_table_node_startup() {
   subnet=0
   until [ $subnet -eq $totalclusters ]; do
      if [ $subnet -ne $loop ]; then
-       echo "ip route add 10.201.1.$((subnet*32))/27 via 10.201.1.$gatewayip0 dev vxlan$vlaninterface" >> $vm-startup.config
+       echo "ip route add 10.201.1.$((subnet*32))/27 via 10.201.1.$gatewayip0 dev vxlan$vlaninterface" >> $vm-startup.script
      fi
      subnet=$((subnet+1))
   done
