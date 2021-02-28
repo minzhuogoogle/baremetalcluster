@@ -70,7 +70,6 @@ Note: You need to have project owner's role to run the script.
 
 * Run gcloud config set project [projectid] to set to a new project.
 
-* After VM rebooting all routing table will be lost.  Connection between 2 clusters in different network will not work after rebooting.
 
 
 
