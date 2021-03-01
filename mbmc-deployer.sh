@@ -649,7 +649,8 @@ prepare_admin_ws() {
    echo "Installing docker"
    curl -fsSL https://get.docker.com -o get-docker.sh
    sh get-docker.sh
-   curl -L https://istio.io/downloadIstio | ISTIO_VERSION=1.8.0 TARGET_ARCH=x86_64 sh -
+   curl -L https://istio.io/downloadIstio | sh -
+   #curl -L https://istio.io/downloadIstio | ISTIO_VERSION=1.8.0 TARGET_ARCH=x86_64 sh -
    curl -OL https://raw.githubusercontent.com/minzhuogoogle/baremetalcluster/main/nginx.yaml
 EOF
    if [ $retcode -ne 0 ]; then
@@ -804,17 +805,17 @@ install_asm() {
   gcloud compute ssh root@$VM_WS --zone $zone "${EXTRA_SSH_ARGS[@]}" << EOF
   export clustername=$clustername
   set -x
+  dirname=istio-1.9.0
   export PATH=$PWD/bin:$PATH
   export KUBECONFIG=/root/bmctl-workspace/$clustername/$clustername-kubeconfig
-  /root/istio-1.8.0/bin/istioctl install --set profile=demo -y
+  /root/istio-1.9.0/bin/istioctl install --set profile=demo -y
   kubectl create namespace bookstore
   kubectl label namespace bookstore istio-injection=enabled
-  kubectl apply -f /root/istio-1.8.0/samples/bookinfo/platform/kube/bookinfo.yaml -n bookstore
-  kubectl apply -f /root/istio-1.8.0/samples/bookinfo/networking/bookinfo-gateway.yaml -n bookstore
-  /root/istio-1.8.0/bin/istioctl analyze
+  kubectl apply -f /root/istio-1.9.0/samples/bookinfo/platform/kube/bookinfo.yaml -n bookstore
+  kubectl apply -f /root/istio-1.9.0/samples/bookinfo/networking/bookinfo-gateway.yaml -n bookstore
+  /root/istio-1.9.0/bin/istioctl analyze
 EOF
 }
-
 
 deploy_nginx() {
   gcloud compute ssh root@$VM_WS --zone $zone "${EXTRA_SSH_ARGS[@]}" << EOF
